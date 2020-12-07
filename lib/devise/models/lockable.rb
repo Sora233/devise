@@ -101,11 +101,13 @@ module Devise
         if super && !access_locked?
           true
         else
-          increment_failed_attempts
-          if attempts_exceeded?
-            lock_access! unless access_locked?
-          else
-            save(validate: false)
+          if perform_lock?
+            increment_failed_attempts
+            if attempts_exceeded?
+              lock_access! unless access_locked?
+            else
+              save(validate: false)
+            end
           end
           false
         end
@@ -128,6 +130,11 @@ module Devise
         else
           super
         end
+      end
+
+      # Give a way to bypass lock logic
+      def perform_lock?
+        true
       end
 
       protected
